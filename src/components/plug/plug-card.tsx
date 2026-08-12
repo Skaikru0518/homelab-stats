@@ -12,6 +12,8 @@ import {
 	formatVolts,
 	formatWatts,
 } from "@/lib/format";
+import { ChevronRight, WifiOff } from "lucide-react";
+import Link from "next/link";
 
 interface PlugCardProps {
 	plug: PlugLiveStatus;
@@ -27,10 +29,18 @@ export function PlugCard({ plug, stats }: PlugCardProps) {
 	return (
 		<Card className="flex flex-col gap-4 p-4 sm:p-5">
 			<div className="flex items-center justify-between gap-3">
-				<div className="flex min-w-0 items-center gap-2">
+				<Link
+					href={`/device/${plug.slug}`}
+					className="flex min-w-0 items-center gap-2 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+				>
 					<StatusDot online={plug.online} />
 					<h2 className="truncate text-sm font-semibold">{plug.name}</h2>
-				</div>
+					<ChevronRight
+						size={14}
+						className="shrink-0 text-app-faint"
+						aria-hidden="true"
+					/>
+				</Link>
 				<span className="shrink-0 font-mono text-[11px] text-app-faint">
 					{plug.host}
 				</span>
@@ -54,13 +64,10 @@ export function PlugCard({ plug, stats }: PlugCardProps) {
 								{peakWatts === null ? "gyűlik az adat" : `csúcs ${formatWatts(peakWatts)} W`}
 							</span>
 						</div>
-						<div className="text-emerald-600 dark:text-emerald-400">
-							<Sparkline
-								data={stats?.series ?? []}
-								gradientId={`spark-${plug.slug}`}
-								label={`${plug.name} teljesítménye az elmúlt 24 órában`}
-							/>
-						</div>
+						<Sparkline
+							data={stats?.series ?? []}
+							gradientId={`spark-${plug.slug}`}
+						/>
 					</div>
 
 					<dl className="grid grid-cols-3 gap-2 border-t border-app-border pt-3">
@@ -85,7 +92,8 @@ export function PlugCard({ plug, stats }: PlugCardProps) {
 				</>
 			) : (
 				<div className="flex flex-1 flex-col justify-center gap-1.5 py-6">
-					<p className="text-sm font-medium text-rose-600 dark:text-rose-400">
+					<p className="flex items-center gap-2 text-sm font-medium text-rose-600 dark:text-rose-400">
+						<WifiOff size={16} aria-hidden="true" />
 						Nem érhető el
 					</p>
 					<p className="font-mono text-xs leading-relaxed text-app-muted">
