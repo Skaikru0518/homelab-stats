@@ -6,6 +6,43 @@ interface BucketRow {
 	power: number;
 }
 
+interface PeakRow {
+	deviceId: string;
+	peak: number;
+}
+
+/**
+ * Valódi csúcsteljesítmény a nyers mérésekből.
+ *
+ * A sparkline sorozat vödrökre átlagol, abból a csúcs lesimulna: egy percig
+ * tartó 1000 W-os felfutás egy 15 perces átlagban alig látszik.
+ */
+export async function getPeakPower(
+	deviceIds: string[],
+	windowHours: number,
+): Promise<Map<string, number>> {
+	const peaks = new Map<string, number>();
+
+	if (deviceIds.length === 0) {
+		return peaks;
+	}
+
+	const windowStart = new Date(Date.now() - windowHours * 3_600_000);
+
+	const rows = await prisma.$queryRaw<PeakRow[]>`
+		SELECT r."deviceId", MAX(r."power")::double precision AS peak
+		FROM "Reading" r
+		WHERE r."ts" >= ${windowStart} AND r."deviceId" = ANY(${deviceIds})
+		GROUP BY r."deviceId"
+	`;
+
+	for (const row of rows) {
+		peaks.set(row.deviceId, row.peak);
+	}
+
+	return peaks;
+}
+
 /**
  * Teljesítmény idősor eszközönként, egyenletes időközű vödrökre átlagolva.
  * A hiányzó vödrök null-ok maradnak — ott megszakad a vonal.

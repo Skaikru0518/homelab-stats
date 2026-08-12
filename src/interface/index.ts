@@ -19,6 +19,7 @@ export type {
 export type {
 	HistoryBucket,
 	HistoryDevice,
+	HistoryDeviceTotal,
 	HistoryRange,
 	HistoryResponse,
 } from "./history";

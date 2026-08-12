@@ -21,10 +21,7 @@ interface PlugCardProps {
 }
 
 export function PlugCard({ plug, stats }: PlugCardProps) {
-	const known = (stats?.series ?? []).filter(
-		(value): value is number => value !== null,
-	);
-	const peakWatts = known.length > 0 ? Math.max(...known) : null;
+	const peakWatts = stats?.peakWatts ?? null;
 
 	return (
 		<Card className="flex flex-col gap-4 p-4 sm:p-5">

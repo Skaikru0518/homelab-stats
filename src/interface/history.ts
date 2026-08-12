@@ -9,6 +9,8 @@ export interface HistoryBucket {
 	costBlendedHuf: number;
 	/** Eszközönkénti kWh, slug szerint. */
 	byDevice: Record<string, number>;
+	/** Eszközönkénti költség határáron, slug szerint. */
+	costByDevice: Record<string, number>;
 }
 
 export interface HistoryDevice {
@@ -16,15 +18,29 @@ export interface HistoryDevice {
 	name: string;
 }
 
+export interface HistoryDeviceTotal extends HistoryDevice {
+	kwh: number;
+	costHuf: number;
+	costBlendedHuf: number;
+	/** Részesedés az időszak összfogyasztásából, 0..1. */
+	share: number;
+}
+
 export interface HistoryResponse {
 	range: HistoryRange;
 	devices: HistoryDevice[];
 	buckets: HistoryBucket[];
+	deviceTotals: HistoryDeviceTotal[];
 	totalKwh: number;
 	totalCostHuf: number;
 	totalCostBlendedHuf: number;
-	/** Napi átlag a szakaszon, kWh. Csak az adattal rendelkező vödrökből. */
 	averageKwh: number;
-	/** A legtöbbet fogyasztó vödör, vagy null ha nincs adat. */
 	peak: HistoryBucket | null;
+	/** Az előző, azonos hosszú időszak fogyasztása. */
+	previousKwh: number;
+	/**
+	 * Változás az előző időszakhoz képest, százalék. Null, ha akkor nem volt
+	 * mérés — nullához képest nincs értelmes százalék.
+	 */
+	changePercent: number | null;
 }

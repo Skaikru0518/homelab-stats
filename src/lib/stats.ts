@@ -1,6 +1,6 @@
 import type { DeviceStats, StatsResponse } from "@/interface";
 import { prisma } from "./database/db";
-import { getPowerSeries } from "./series";
+import { getPeakPower, getPowerSeries } from "./series";
 
 const TIME_ZONE = "Europe/Budapest";
 
@@ -46,11 +46,11 @@ export async function getStats(): Promise<StatsResponse> {
 		LIMIT 1
 	`;
 
-	const seriesByDevice = await getPowerSeries(
-		todayRows.map((row) => row.id),
-		WINDOW_HOURS,
-		BUCKET_COUNT,
-	);
+	const deviceIds = todayRows.map((row) => row.id);
+	const [seriesByDevice, peakByDevice] = await Promise.all([
+		getPowerSeries(deviceIds, WINDOW_HOURS, BUCKET_COUNT),
+		getPeakPower(deviceIds, WINDOW_HOURS),
+	]);
 
 	const devices: DeviceStats[] = todayRows.map((row) => ({
 		slug: row.slug,
@@ -58,6 +58,7 @@ export async function getStats(): Promise<StatsResponse> {
 		todayCostHuf: row.costHuf,
 		todayCostBlendedHuf: row.costBlendedHuf,
 		series: seriesByDevice.get(row.id) ?? [],
+		peakWatts: peakByDevice.get(row.id) ?? null,
 	}));
 
 	return {

@@ -6,7 +6,7 @@ import {
 	GRID_COLOR,
 	SERIES_COLORS,
 } from "@/components/chart/chart-theme";
-import { formatKwh } from "@/lib/format";
+import { formatHuf, formatKwh } from "@/lib/format";
 import {
 	Bar,
 	BarChart,
@@ -27,7 +27,10 @@ export interface EnergyBucket {
 	key: string;
 	label: string;
 	byDevice: Record<string, number>;
+	costByDevice?: Record<string, number>;
 }
+
+export type ChartMetric = "kwh" | "cost";
 
 interface EnergyBarChartProps {
 	buckets: EnergyBucket[];
@@ -36,6 +39,7 @@ interface EnergyBarChartProps {
 	labelInterval?: number;
 	showLegend?: boolean;
 	height?: number;
+	metric?: ChartMetric;
 }
 
 export function EnergyBarChart({
@@ -44,9 +48,16 @@ export function EnergyBarChart({
 	labelInterval = 0,
 	showLegend = true,
 	height = 224,
+	metric = "kwh",
 }: EnergyBarChartProps) {
+	const isCost = metric === "cost";
+	const unit = isCost ? "Ft" : "kWh";
+	const format = isCost ? formatHuf : formatKwh;
+	const pick = (bucket: EnergyBucket, slug: string) =>
+		(isCost ? bucket.costByDevice?.[slug] : bucket.byDevice[slug]) ?? 0;
+
 	const hasData = buckets.some((bucket) =>
-		series.some((entry) => (bucket.byDevice[entry.slug] ?? 0) > 0),
+		series.some((entry) => pick(bucket, entry.slug) > 0),
 	);
 
 	if (!hasData) {
@@ -63,7 +74,7 @@ export function EnergyBarChart({
 	const data = buckets.map((bucket) => {
 		const row: Record<string, string | number> = { label: bucket.label };
 		for (const entry of series) {
-			row[entry.slug] = bucket.byDevice[entry.slug] ?? 0;
+			row[entry.slug] = pick(bucket, entry.slug);
 		}
 		return row;
 	});
@@ -88,14 +99,12 @@ export function EnergyBarChart({
 						tick={AXIS_TICK}
 						tickLine={false}
 						axisLine={false}
-						width={44}
-						tickFormatter={(value: number) => formatKwh(value)}
+						width={48}
+						tickFormatter={(value: number) => format(value)}
 					/>
 					<Tooltip
 						cursor={{ fill: "var(--app-inset)" }}
-						content={
-							<ChartTooltip unit="kWh" showTotal format={formatKwh} />
-						}
+						content={<ChartTooltip unit={unit} showTotal format={format} />}
 					/>
 					{showLegend && (
 						<Legend

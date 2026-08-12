@@ -7,6 +7,8 @@ export interface DeviceStats {
 	todayCostBlendedHuf: number;
 	/** Fix hosszú teljesítmény idősor wattban. A null adathiány, ott megszakad a vonal. */
 	series: (number | null)[];
+	/** Valódi csúcs a nyers mérésekből, nem a sorozat átlagaiból. Null, ha nincs adat. */
+	peakWatts: number | null;
 }
 
 export interface StatsResponse {
