@@ -2,7 +2,7 @@ param(
     [string]$Server   = "dante0518@100.105.98.51",
     [string]$Image    = "homelab-stats:latest",
     [string]$Tar      = "homelab-stats.tar",
-    [string]$Service  = "homelab-stats",
+    [string]$StackDir = "/srv/stacks/homelab-stats",
     [string]$Url      = "https://homelab.tail0a79e5.ts.net:10443"
 )
 
@@ -30,7 +30,8 @@ if ($LASTEXITCODE -ne 0) { Remove-Item $Tar -EA SilentlyContinue; Fail "upload f
 
 # --- betoltes + ujrainditas + takaritas ---
 Step "load + restart"
-ssh $Server "docker load -i /tmp/$Tar && cd /srv/stack && docker compose up -d $Service && rm -f /tmp/$Tar && docker image prune -f && docker compose ps $Service"
+ssh $Server "docker load -i /tmp/$Tar && cd $StackDir && docker compose up -d --force-recreate && rm -f /tmp/$Tar &&
+docker image prune -f && docker compose ps"
 if ($LASTEXITCODE -ne 0) { Remove-Item $Tar -EA SilentlyContinue; Fail "deploy failed" }
 
 Remove-Item $Tar -EA SilentlyContinue
