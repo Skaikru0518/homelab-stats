@@ -11,3 +11,55 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Device {
+  id      String  @id @default(cuid())
+  slug    String  @unique
+  name    String
+  host    String
+  enabled Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  readings Reading[]
+  daily    DailyEnergy[]
+}
+
+model Reading {
+  id            String   @id @default(cuid())
+  deviceId      String
+  ts            DateTime
+  power         Float // W
+  voltage       Float // V
+  current       Float // A
+  apparentPower Float // VA
+  reactivePower Float // var
+  factor        Float // 0...1
+  totalKwh      Float
+  device        Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceId, ts])
+}
+
+model DailyEnergy {
+  id        String   @id @default(cuid())
+  deviceId  String
+  date      DateTime @db.Date
+  kwh       Float
+  costHuf   Float // aznap érvényes árral számolva, befagyasztva
+  avgPower  Float // W
+  peakPower Float // W
+  updatedAt DateTime @updatedAt
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceId, date])
+}
+
+model ElectricityPrice {
+  id        String   @id @default(cuid())
+  validFrom DateTime @unique @db.Date
+  hufPerKwh Float
+  createdAt DateTime @default(now())
+}
