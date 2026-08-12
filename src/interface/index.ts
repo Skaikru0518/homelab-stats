@@ -12,3 +12,4 @@ export type {
 export type { DevicePollResult, PollSummary } from "./poll";
 export type { CreateReadingDto, Reading } from "./reading";
 export type { TasmotaEnergy } from "./tasmota";
+export type { PlugLiveStatus, PlugsResponse } from "./plug";
