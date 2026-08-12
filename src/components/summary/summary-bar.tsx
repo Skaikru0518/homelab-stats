@@ -7,7 +7,9 @@ interface SummaryBarProps {
 	totalPower: number;
 	totalTodayKwh: number;
 	totalTodayCostHuf: number;
+	totalTodayCostBlendedHuf: number;
 	hufPerKwh: number;
+	blendedHufPerKwh: number | null;
 	onlineCount: number;
 	deviceCount: number;
 	/** Hamis, ha az utolsó frissítés nem sikerült — a számok ilyenkor régiek. */
@@ -18,7 +20,9 @@ export function SummaryBar({
 	totalPower,
 	totalTodayKwh,
 	totalTodayCostHuf,
+	totalTodayCostBlendedHuf,
 	hufPerKwh,
+	blendedHufPerKwh,
 	onlineCount,
 	deviceCount,
 	live,
@@ -46,11 +50,20 @@ export function SummaryBar({
 				{/* Mobilon rács, hogy a három érték ne feszítse szét a kártyát. */}
 				<dl className="grid grid-cols-3 gap-3 sm:flex sm:gap-10">
 					<Total label="Ma" value={`${formatKwh(totalTodayKwh)} kWh`} />
-					<Total label="Költség" value={`${formatHuf(totalTodayCostHuf)} Ft`} />
+					<Total
+						label="Költség"
+						value={`${formatHuf(totalTodayCostHuf)} Ft`}
+						note={`átlagáron ${formatHuf(totalTodayCostBlendedHuf)} Ft`}
+					/>
 					<Total
 						label="Egységár"
 						value={`${formatHuf(hufPerKwh)} Ft`}
 						unit="/kWh"
+						note={
+							blendedHufPerKwh === null
+								? undefined
+								: `átlag ${formatHuf(blendedHufPerKwh)} Ft`
+						}
 						muted
 					/>
 				</dl>
@@ -64,10 +77,11 @@ interface TotalProps {
 	value: string;
 	/** Mértékegység, ami mobilon elmarad — ott nem férne ki. */
 	unit?: string;
+	note?: string;
 	muted?: boolean;
 }
 
-function Total({ label, value, unit, muted = false }: TotalProps) {
+function Total({ label, value, unit, note, muted = false }: TotalProps) {
 	return (
 		<div className="flex min-w-0 flex-col gap-1">
 			<dt>
@@ -81,6 +95,11 @@ function Total({ label, value, unit, muted = false }: TotalProps) {
 				{value}
 				{unit && <span className="hidden sm:inline">{unit}</span>}
 			</dd>
+			{note && (
+				<dd className="font-mono text-[11px] leading-tight text-app-faint">
+					{note}
+				</dd>
+			)}
 		</div>
 	);
 }

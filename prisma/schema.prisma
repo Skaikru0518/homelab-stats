@@ -43,14 +43,15 @@ model Reading {
 }
 
 model DailyEnergy {
-  id        String   @id @default(cuid())
-  deviceId  String
-  date      DateTime @db.Date
-  kwh       Float
-  costHuf   Float // aznap érvényes árral számolva, befagyasztva
-  avgPower  Float // W
-  peakPower Float // W
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(cuid())
+  deviceId       String
+  date           DateTime @db.Date
+  kwh            Float
+  costHuf        Float // határáron, aznap érvényes árral befagyasztva
+  costBlendedHuf Float    @default(0) // számla szerinti átlagáron
+  avgPower       Float // W
+  peakPower      Float // W
+  updatedAt      DateTime @updatedAt
 
   device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
 
@@ -58,8 +59,11 @@ model DailyEnergy {
 }
 
 model ElectricityPrice {
-  id        String   @id @default(cuid())
-  validFrom DateTime @unique @db.Date
-  hufPerKwh Float
-  createdAt DateTime @default(now())
+  id               String   @id @default(cuid())
+  validFrom        DateTime @unique @db.Date
+  /// Határköltség: mennyibe kerül egy plusz kWh a kedvezményes kereten felül.
+  hufPerKwh        Float
+  /// A számla szerinti tényleges átlagár. Null, ha még nincs elszámoló számla.
+  blendedHufPerKwh Float?
+  createdAt        DateTime @default(now())
 }

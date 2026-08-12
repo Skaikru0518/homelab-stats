@@ -1,31 +1,28 @@
 import type { ElectricityPriceModel } from "@/generated/prisma/models/ElectricityPrice";
 import type { AssertTrue, Equals } from "./_assert";
 
-/** Áramár egy adott dátumtól érvényesen. */
 export interface ElectricityPrice {
 	id: string;
-	/** Ettől a naptól érvényes ez az ár. */
 	validFrom: Date;
-	/** Bruttó ár, HUF/kWh. */
+	/** Határár bruttóban: egy plusz kWh ára a kedvezményes kereten felül. */
 	hufPerKwh: number;
+	/** Számla szerinti átlagár bruttóban. Null, amíg nincs elszámoló számla. */
+	blendedHufPerKwh: number | null;
 	createdAt: Date;
 }
 
-/** Új ársáv felvétele. */
 export interface CreateElectricityPriceDto {
 	validFrom: Date;
 	hufPerKwh: number;
+	blendedHufPerKwh?: number | null;
 }
 
-/**
- * Meglévő ársáv javítása. A validFrom a kulcs — új érvényességi dátumhoz
- * új sort veszünk fel, nem írjuk át a régit.
- */
+/** Áremelés = új sor új validFrom-mal, nem a régi átírása. */
 export interface UpdateElectricityPriceDto {
 	hufPerKwh?: number;
+	blendedHufPerKwh?: number | null;
 }
 
-/** Fordítási idejű őr: eltér a séma? -> tsc hiba. */
 type _ElectricityPriceMatchesSchema = AssertTrue<
 	Equals<ElectricityPriceModel, ElectricityPrice>
 >;

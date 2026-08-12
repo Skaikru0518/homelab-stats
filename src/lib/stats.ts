@@ -14,6 +14,7 @@ interface TodayRow {
 	slug: string;
 	kwh: number;
 	costHuf: number;
+	costBlendedHuf: number;
 }
 
 interface BucketRow {
@@ -24,6 +25,7 @@ interface BucketRow {
 
 interface PriceRow {
 	hufPerKwh: number;
+	blendedHufPerKwh: number | null;
 }
 
 /**
@@ -43,7 +45,8 @@ export async function getStats(): Promise<StatsResponse> {
 			d."id",
 			d."slug",
 			COALESCE(de."kwh", 0)::double precision AS kwh,
-			COALESCE(de."costHuf", 0)::double precision AS "costHuf"
+			COALESCE(de."costHuf", 0)::double precision AS "costHuf",
+			COALESCE(de."costBlendedHuf", 0)::double precision AS "costBlendedHuf"
 		FROM "Device" d
 		LEFT JOIN "DailyEnergy" de
 			ON de."deviceId" = d."id"
@@ -65,7 +68,9 @@ export async function getStats(): Promise<StatsResponse> {
 	`;
 
 	const priceRows = await prisma.$queryRaw<PriceRow[]>`
-		SELECT "hufPerKwh"::double precision AS "hufPerKwh"
+		SELECT
+			"hufPerKwh"::double precision AS "hufPerKwh",
+			"blendedHufPerKwh"::double precision AS "blendedHufPerKwh"
 		FROM "ElectricityPrice"
 		WHERE "validFrom" <= (now() AT TIME ZONE ${TIME_ZONE})::date
 		ORDER BY "validFrom" DESC
@@ -90,6 +95,7 @@ export async function getStats(): Promise<StatsResponse> {
 		slug: row.slug,
 		todayKwh: row.kwh,
 		todayCostHuf: row.costHuf,
+		todayCostBlendedHuf: row.costBlendedHuf,
 		series: seriesByDevice.get(row.id) ?? [],
 	}));
 
@@ -97,7 +103,12 @@ export async function getStats(): Promise<StatsResponse> {
 		windowHours: WINDOW_HOURS,
 		totalTodayKwh: devices.reduce((sum, d) => sum + d.todayKwh, 0),
 		totalTodayCostHuf: devices.reduce((sum, d) => sum + d.todayCostHuf, 0),
+		totalTodayCostBlendedHuf: devices.reduce(
+			(sum, d) => sum + d.todayCostBlendedHuf,
+			0,
+		),
 		hufPerKwh: priceRows[0]?.hufPerKwh ?? 0,
+		blendedHufPerKwh: priceRows[0]?.blendedHufPerKwh ?? null,
 		devices,
 	};
 }

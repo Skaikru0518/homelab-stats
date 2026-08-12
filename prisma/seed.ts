@@ -3,6 +3,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 
 const HUF_PER_KWH = 70.104;
+// 2026.06.28-07.27 elszámoló számla: 32 978 Ft / 571 kWh
+const BLENDED_HUF_PER_KWH = 57.755;
 const PRICE_VALID_FROM = new Date("2026-08-12");
 
 const devices = [
@@ -28,8 +30,15 @@ async function main() {
 
 	await prisma.electricityPrice.upsert({
 		where: { validFrom: PRICE_VALID_FROM },
-		update: { hufPerKwh: HUF_PER_KWH },
-		create: { validFrom: PRICE_VALID_FROM, hufPerKwh: HUF_PER_KWH },
+		update: {
+			hufPerKwh: HUF_PER_KWH,
+			blendedHufPerKwh: BLENDED_HUF_PER_KWH,
+		},
+		create: {
+			validFrom: PRICE_VALID_FROM,
+			hufPerKwh: HUF_PER_KWH,
+			blendedHufPerKwh: BLENDED_HUF_PER_KWH,
+		},
 	});
 
 	console.log(`Seed kész: ${devices.length} eszköz, ${HUF_PER_KWH} Ft/kWh`);

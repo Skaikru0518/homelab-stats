@@ -78,6 +78,7 @@ export function PlugCard({ plug, stats }: PlugCardProps) {
 						<Metric
 							label="Ma költség"
 							value={`${formatHuf(stats?.todayCostHuf ?? 0)} Ft`}
+							note={`átlagáron ${formatHuf(stats?.todayCostBlendedHuf ?? 0)} Ft`}
 							emphasis
 						/>
 					</dl>
@@ -99,10 +100,11 @@ export function PlugCard({ plug, stats }: PlugCardProps) {
 interface MetricProps {
 	label: string;
 	value: string;
+	note?: string;
 	emphasis?: boolean;
 }
 
-function Metric({ label, value, emphasis = false }: MetricProps) {
+function Metric({ label, value, note, emphasis = false }: MetricProps) {
 	return (
 		<div className="flex flex-col gap-0.5">
 			<dt>
@@ -115,6 +117,11 @@ function Metric({ label, value, emphasis = false }: MetricProps) {
 			>
 				{value}
 			</dd>
+			{note && (
+				<dd className="font-mono text-[11px] leading-tight text-app-faint">
+					{note}
+				</dd>
+			)}
 		</div>
 	);
 }

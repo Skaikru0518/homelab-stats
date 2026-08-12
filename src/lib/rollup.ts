@@ -16,6 +16,7 @@ interface DailyAggregate {
 	avgPower: number;
 	peakPower: number;
 	hufPerKwh: number;
+	blendedHufPerKwh: number;
 }
 
 /**
@@ -68,10 +69,12 @@ export async function rollupRecentDays(
 			d.kwh,
 			d."avgPower",
 			d."peakPower",
-			COALESCE(p."hufPerKwh", 0)::double precision AS "hufPerKwh"
+			COALESCE(p."hufPerKwh", 0)::double precision AS "hufPerKwh",
+			COALESCE(p."blendedHufPerKwh", p."hufPerKwh", 0)::double precision
+				AS "blendedHufPerKwh"
 		FROM daily d
 		LEFT JOIN LATERAL (
-			SELECT pr."hufPerKwh"
+			SELECT pr."hufPerKwh", pr."blendedHufPerKwh"
 			FROM "ElectricityPrice" pr
 			WHERE pr."validFrom" <= d.day
 			ORDER BY pr."validFrom" DESC
@@ -83,23 +86,20 @@ export async function rollupRecentDays(
 
 	for (const row of rows) {
 		const costHuf = row.kwh * row.hufPerKwh;
+		const costBlendedHuf = row.kwh * row.blendedHufPerKwh;
+
+		const values = {
+			kwh: row.kwh,
+			costHuf,
+			costBlendedHuf,
+			avgPower: row.avgPower,
+			peakPower: row.peakPower,
+		};
 
 		await prisma.dailyEnergy.upsert({
 			where: { deviceId_date: { deviceId: row.deviceId, date: row.day } },
-			update: {
-				kwh: row.kwh,
-				costHuf,
-				avgPower: row.avgPower,
-				peakPower: row.peakPower,
-			},
-			create: {
-				deviceId: row.deviceId,
-				date: row.day,
-				kwh: row.kwh,
-				costHuf,
-				avgPower: row.avgPower,
-				peakPower: row.peakPower,
-			},
+			update: values,
+			create: { deviceId: row.deviceId, date: row.day, ...values },
 		});
 	}
 

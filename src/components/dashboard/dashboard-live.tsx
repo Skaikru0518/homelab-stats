@@ -38,7 +38,9 @@ export function DashboardLive({
 				totalPower={plugs.data.totalPower}
 				totalTodayKwh={stats.data.totalTodayKwh}
 				totalTodayCostHuf={stats.data.totalTodayCostHuf}
+				totalTodayCostBlendedHuf={stats.data.totalTodayCostBlendedHuf}
 				hufPerKwh={stats.data.hufPerKwh}
+				blendedHufPerKwh={stats.data.blendedHufPerKwh}
 				onlineCount={onlineCount}
 				deviceCount={plugs.data.plugs.length}
 				live={plugs.live}
