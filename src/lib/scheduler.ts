@@ -1,4 +1,5 @@
 import { pollAllDevices } from "./poller";
+import { rollupRecentDays } from "./rollup";
 
 const POLL_INTERVAL_MS = 60_000;
 
@@ -19,6 +20,14 @@ async function runOnce(): Promise<void> {
 			if (!result.ok) {
 				console.warn(`[poll] ${result.slug}: ${result.error}`);
 			}
+		}
+
+		// A rollup a nyers sorokból számol, ezért a beszúrás után kell futnia.
+		// Hibája nem érintheti a gyűjtést — a mérések már mentve vannak.
+		try {
+			await rollupRecentDays();
+		} catch (error) {
+			console.error("[poll] rollup failed:", error);
 		}
 
 		console.log(

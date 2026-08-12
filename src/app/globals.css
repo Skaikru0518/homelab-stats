@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
+/* Osztály alapú sötét mód — a téma kapcsoló a <html>-re teszi rá. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+	--app-bg: #f4f4f5;
+	--app-panel: #ffffff;
+	--app-inset: #fafafa;
+	--app-border: #e4e4e7;
+	--app-text: #18181b;
+	--app-muted: #71717a;
+	--app-faint: #a1a1aa;
+}
+
+.dark {
+	--app-bg: #09090b;
+	--app-panel: #131316;
+	--app-inset: #1a1a1f;
+	--app-border: #27272c;
+	--app-text: #fafafa;
+	--app-muted: #8b8b94;
+	--app-faint: #5c5c66;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+	--font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+	--font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+	--color-app-bg: var(--app-bg);
+	--color-app-panel: var(--app-panel);
+	--color-app-inset: var(--app-inset);
+	--color-app-border: var(--app-border);
+	--color-app-text: var(--app-text);
+	--color-app-muted: var(--app-muted);
+	--color-app-faint: var(--app-faint);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+	background-color: var(--app-bg);
+	color: var(--app-text);
+	/* A mérőszámok tabulárisak, hogy frissítéskor ne ugráljanak a számjegyek. */
+	font-variant-numeric: tabular-nums;
+}
+
+/* Billentyűzetes fókusz mindig látszik, egérkattintásnál nem zavar. */
+:focus-visible {
+	outline: 2px solid #10b981;
+	outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+button {
+	@apply hover:cursor-pointer;
 }
