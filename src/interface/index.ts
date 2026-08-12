@@ -10,3 +10,4 @@ export type {
 	UpdateElectricityPriceDto,
 } from "./electricity-price";
 export type { CreateReadingDto, Reading } from "./reading";
+export type { TasmotaEnergy } from "./tasmota";
