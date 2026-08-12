@@ -1,6 +1,7 @@
 import { StatusDot } from "@/components/plug/status-dot";
+import { AnimatedWatts } from "@/components/ui/animated-watts";
 import { Card, Label } from "@/components/ui/card";
-import { formatHuf, formatKwh, formatWatts } from "@/lib/format";
+import { formatHuf, formatKwh } from "@/lib/format";
 
 interface SummaryBarProps {
 	totalPower: number;
@@ -36,7 +37,7 @@ export function SummaryBar({
 					</div>
 					<div className="flex items-baseline gap-2">
 						<span className="font-mono text-5xl font-semibold leading-none tracking-tighter sm:text-7xl">
-							{formatWatts(totalPower)}
+							<AnimatedWatts value={totalPower} />
 						</span>
 						<span className="text-xl text-app-muted sm:text-2xl">W</span>
 					</div>

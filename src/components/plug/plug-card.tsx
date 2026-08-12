@@ -1,6 +1,7 @@
 import { Sparkline } from "@/components/chart/sparkline";
 import { LoadBar } from "@/components/plug/load-bar";
 import { StatusDot } from "@/components/plug/status-dot";
+import { AnimatedWatts } from "@/components/ui/animated-watts";
 import { Card, Label } from "@/components/ui/card";
 import type { DeviceStats, PlugLiveStatus } from "@/interface";
 import {
@@ -39,7 +40,7 @@ export function PlugCard({ plug, stats }: PlugCardProps) {
 				<>
 					<div className="flex items-baseline gap-1.5">
 						<span className="font-mono text-4xl font-semibold leading-none tracking-tight sm:text-[2.75rem]">
-							{formatWatts(plug.power)}
+							<AnimatedWatts value={plug.power} />
 						</span>
 						<span className="text-lg text-app-muted">W</span>
 					</div>
