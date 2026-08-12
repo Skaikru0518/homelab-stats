@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const LINKS = [
 	{ href: "/", label: "Áttekintés" },
 	{ href: "/history", label: "Előzmények" },
+	{ href: "/devices", label: "Eszközök" },
 ] as const;
 
 export function NavLinks() {

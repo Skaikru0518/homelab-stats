@@ -12,6 +12,11 @@ export type {
 export type { DevicePollResult, PollSummary } from "./poll";
 export type { CreateReadingDto, Reading } from "./reading";
 export type {
+	DeviceListItem,
+	FieldErrors,
+	MutationResult,
+} from "./device-admin";
+export type {
 	DeviceDailyRow,
 	DeviceDetailResponse,
 	PeriodTotals,

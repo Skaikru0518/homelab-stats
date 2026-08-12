@@ -48,7 +48,10 @@ function parseEnergy(host: string, payload: unknown): TasmotaEnergy {
 }
 
 /** Nyers adatok lekérdezése egy Tasmota eszközről */
-export async function fetchTasmotaEnergy(host: string): Promise<TasmotaEnergy> {
+export async function fetchTasmotaEnergy(
+	host: string,
+	timeoutMs: number = REQUEST_TIMEOUT_MS,
+): Promise<TasmotaEnergy> {
 	const url = `http://${host}/cm?cmnd=Status%2010`;
 
 	let response: Response;
@@ -56,12 +59,12 @@ export async function fetchTasmotaEnergy(host: string): Promise<TasmotaEnergy> {
 	try {
 		response = await fetch(url, {
 			cache: "no-store",
-			signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+			signal: AbortSignal.timeout(timeoutMs),
 		});
 	} catch (cause) {
 		const reason =
 			cause instanceof DOMException && cause.name === "TimeoutError"
-				? `nem válaszolt: ${REQUEST_TIMEOUT_MS} ms alatt`
+				? `nem válaszolt: ${timeoutMs} ms alatt`
 				: "nem érhető el";
 
 		throw new TasmotaError(host, reason, cause);

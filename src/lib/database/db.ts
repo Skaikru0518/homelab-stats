@@ -3,9 +3,9 @@ import { PrismaClient } from "@/generated/prisma/client";
 
 const connectionString = process.env["DATABASE_URL"];
 
-if (!connectionString) {
-	throw new Error("DATABASE URL IS MISSING");
-}
+// if (!connectionString) {
+// 	throw new Error("DATABASE URL IS MISSING");
+// }
 
 const createPrismaClient = () =>
 	new PrismaClient({
