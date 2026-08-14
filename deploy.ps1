@@ -3,7 +3,7 @@ param(
     [string]$Image    = "homelab-stats:latest",
     [string]$Tar      = "homelab-stats.tar",
     [string]$StackDir = "/srv/stacks/homelab-stats",
-    [string]$Url      = "https://homelab.tail0a79e5.ts.net:10443"
+    [string]$Url = "https://homelab.tail0a79e5.ts.net/stats"
 )
 
 $ErrorActionPreference = "Stop"
