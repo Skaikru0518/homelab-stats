@@ -16,14 +16,17 @@ interface DevicesTableProps {
 
 type Editing = { mode: "create" } | { mode: "edit"; slug: string } | null;
 
+const FORM_EXIT_MS = 200;
+const DIALOG_EXIT_MS = 160;
+
 export function DevicesTable({ devices }: DevicesTableProps) {
 	const router = useRouter();
 	const [editing, setEditing] = useState<Editing>(null);
+	const [formLeaving, setFormLeaving] = useState(false);
 	const [pendingDelete, setPendingDelete] = useState<DeviceListItem | null>(
 		null,
 	);
-	// A szerver újratölti a listát és közben megpingeli az eszközöket. A
-	// tranzakció addig fut, amíg az új adat meg nem érkezik.
+	const [dialogLeaving, setDialogLeaving] = useState(false);
 	const [refreshing, startRefresh] = useTransition();
 
 	function refresh() {
@@ -32,8 +35,29 @@ export function DevicesTable({ devices }: DevicesTableProps) {
 		});
 	}
 
+	function closeForm() {
+		setFormLeaving(true);
+		setTimeout(() => {
+			setEditing(null);
+			setFormLeaving(false);
+		}, FORM_EXIT_MS);
+	}
+
+	function openForm(next: Editing) {
+		setFormLeaving(false);
+		setEditing(next);
+	}
+
+	function closeDialog() {
+		setDialogLeaving(true);
+		setTimeout(() => {
+			setPendingDelete(null);
+			setDialogLeaving(false);
+		}, DIALOG_EXIT_MS);
+	}
+
 	function done() {
-		setEditing(null);
+		closeForm();
 		refresh();
 	}
 
@@ -48,7 +72,7 @@ export function DevicesTable({ devices }: DevicesTableProps) {
 				<h1 className="text-lg font-semibold tracking-tight">Eszközök</h1>
 				<button
 					type="button"
-					onClick={() => setEditing({ mode: "create" })}
+					onClick={() => openForm({ mode: "create" })}
 					className="flex min-h-10 items-center gap-2 rounded-lg bg-emerald-500 px-3.5 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
 				>
 					<Plus size={16} aria-hidden="true" />
@@ -63,13 +87,21 @@ export function DevicesTable({ devices }: DevicesTableProps) {
 				}`}
 			>
 				{editing !== null && (
-					<DeviceForm
-						key={editing.mode === "edit" ? editing.slug : "create"}
-						device={editTarget}
-						all={devices}
-						onDone={done}
-						onCancel={() => setEditing(null)}
-					/>
+					<div
+						className={`grid ${
+							formLeaving ? "animate-panel-out" : "animate-panel-in"
+						}`}
+					>
+						<div className="min-h-0 overflow-hidden">
+							<DeviceForm
+								key={editing.mode === "edit" ? editing.slug : "create"}
+								device={editTarget}
+								all={devices}
+								onDone={done}
+								onCancel={closeForm}
+							/>
+						</div>
+					</div>
 				)}
 
 				{devices.length === 0 ? (
@@ -142,7 +174,7 @@ export function DevicesTable({ devices }: DevicesTableProps) {
 												<IconButton
 													label={`${device.name} szerkesztése`}
 													onClick={() =>
-														setEditing({ mode: "edit", slug: device.slug })
+														openForm({ mode: "edit", slug: device.slug })
 													}
 												>
 													<Pencil size={15} />
@@ -167,9 +199,10 @@ export function DevicesTable({ devices }: DevicesTableProps) {
 			{pendingDelete && (
 				<DeleteDialog
 					device={pendingDelete}
-					onClose={() => setPendingDelete(null)}
+					leaving={dialogLeaving}
+					onClose={closeDialog}
 					onDeleted={() => {
-						setPendingDelete(null);
+						closeDialog();
 						refresh();
 					}}
 				/>
@@ -212,10 +245,12 @@ function Status({ device }: { device: DeviceListItem }) {
 
 function DeleteDialog({
 	device,
+	leaving,
 	onClose,
 	onDeleted,
 }: {
 	device: DeviceListItem;
+	leaving: boolean;
 	onClose: () => void;
 	onDeleted: () => void;
 }) {
@@ -243,12 +278,18 @@ function DeleteDialog({
 	}
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
+		<div
+			className={`fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 backdrop-blur-[2px] sm:items-center ${
+				leaving ? "animate-scrim-out" : "animate-scrim-in"
+			}`}
+		>
 			<div
 				role="alertdialog"
 				aria-modal="true"
 				aria-labelledby="delete-title"
-				className="w-full max-w-md rounded-xl border border-app-border bg-app-panel p-5"
+				className={`w-full max-w-md rounded-xl border border-app-border bg-app-panel p-5 shadow-2xl ${
+					leaving ? "animate-pop-out" : "animate-pop-in"
+				}`}
 			>
 				<h2 id="delete-title" className="text-base font-semibold">
 					{device.name} törlése
