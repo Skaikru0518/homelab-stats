@@ -19,8 +19,8 @@ interface PlugCardProps {
 	plug: PlugLiveStatus;
 	stats: DeviceStats | undefined;
 	windowHours: number;
-	/** Az eszközök, amiknek a mérése ezen belül van. */
 	subDevices: PlugLiveStatus[];
+	delay: number;
 }
 
 export function PlugCard({
@@ -28,6 +28,7 @@ export function PlugCard({
 	stats,
 	windowHours,
 	subDevices,
+	delay,
 }: PlugCardProps) {
 	const peakWatts = stats?.peakWatts ?? null;
 
@@ -39,7 +40,7 @@ export function PlugCard({
 	const remainder = plug.online ? plug.power - childTotal : 0;
 
 	return (
-		<Card className="flex flex-col gap-4 p-4 sm:p-5">
+		<Card className="flex flex-col gap-4 p-4 sm:p-5" delay={delay}>
 			<div className="flex items-center justify-between gap-3">
 				<Link
 					href={`/device/${plug.slug}`}

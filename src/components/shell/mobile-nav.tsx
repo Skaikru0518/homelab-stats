@@ -16,7 +16,7 @@ export function MobileNav() {
 	const [state, setState] = useState<SheetState>("closed");
 	const [mounted, setMounted] = useState(false);
 	const trigger = useRef<HTMLButtonElement>(null);
-	const panel = useRef<HTMLDivElement>(null);
+	const closeButton = useRef<HTMLButtonElement>(null);
 
 	useEffect(() => setMounted(true), []);
 
@@ -44,7 +44,7 @@ export function MobileNav() {
 			return;
 		}
 
-		panel.current?.focus();
+		closeButton.current?.focus();
 
 		const previousOverflow = document.body.style.overflow;
 		document.body.style.overflow = "hidden";
@@ -94,12 +94,10 @@ export function MobileNav() {
 						/>
 
 						<div
-							ref={panel}
 							role="dialog"
 							aria-modal="true"
 							aria-label="Menü"
-							tabIndex={-1}
-							className={`fixed inset-y-0 right-0 z-50 flex w-[17rem] max-w-[85vw] flex-col border-l border-app-border bg-app-panel shadow-2xl outline-none ${
+							className={`fixed inset-y-0 right-0 z-50 flex w-[17rem] max-w-[85vw] flex-col border-l border-app-border bg-app-panel shadow-2xl ${
 								leaving ? "animate-sheet-out" : "animate-sheet-in"
 							}`}
 						>
@@ -115,6 +113,7 @@ export function MobileNav() {
 									</span>
 								</span>
 								<button
+									ref={closeButton}
 									type="button"
 									onClick={close}
 									aria-label="Menü bezárása"

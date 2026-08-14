@@ -44,7 +44,7 @@ export function DevicesTable({ devices }: DevicesTableProps) {
 
 	return (
 		<div className="flex flex-col gap-4">
-			<div className="flex items-center justify-between gap-3">
+			<div className="flex animate-rise items-center justify-between gap-3">
 				<h1 className="text-lg font-semibold tracking-tight">Eszközök</h1>
 				<button
 					type="button"
@@ -57,6 +57,7 @@ export function DevicesTable({ devices }: DevicesTableProps) {
 			</div>
 
 			<Card
+				delay={70}
 				className={`overflow-hidden transition-opacity duration-200 ${
 					refreshing ? "opacity-60" : "opacity-100"
 				}`}

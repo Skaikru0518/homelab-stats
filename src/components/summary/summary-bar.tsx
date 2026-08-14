@@ -28,7 +28,7 @@ export function SummaryBar({
 	live,
 }: SummaryBarProps) {
 	return (
-		<Card className="p-4 sm:p-6">
+		<Card className="p-4 sm:p-6" delay={0}>
 			<div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
 				<div className="flex min-w-0 flex-col gap-2">
 					<div className="flex items-center gap-2">

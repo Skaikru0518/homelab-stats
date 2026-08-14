@@ -40,6 +40,7 @@ interface EnergyBarChartProps {
 	showLegend?: boolean;
 	height?: number;
 	metric?: ChartMetric;
+	animate?: boolean;
 }
 
 export function EnergyBarChart({
@@ -49,6 +50,7 @@ export function EnergyBarChart({
 	showLegend = true,
 	height = 224,
 	metric = "kwh",
+	animate = false,
 }: EnergyBarChartProps) {
 	const isCost = metric === "cost";
 	const unit = isCost ? "Ft" : "kWh";
@@ -125,7 +127,10 @@ export function EnergyBarChart({
 							stackId="kwh"
 							fill={SERIES_COLORS[index % SERIES_COLORS.length]}
 							radius={index === series.length - 1 ? [3, 3, 0, 0] : undefined}
-							isAnimationActive={false}
+							isAnimationActive={animate}
+							animationDuration={550}
+							animationBegin={index * 90}
+							animationEasing="ease-out"
 						/>
 					))}
 				</BarChart>

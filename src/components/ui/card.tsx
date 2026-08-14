@@ -3,13 +3,18 @@ import type { ReactNode } from "react";
 interface CardProps {
 	children: ReactNode;
 	className?: string;
+	/** Beúszás késleltetése ezredmásodpercben. Lépcsőzetes megjelenéshez. */
+	delay?: number;
 }
 
 /** Alap panel: lekerekített, vékony kerettel, a háttérnél világosabb. */
-export function Card({ children, className = "" }: CardProps) {
+export function Card({ children, className = "", delay }: CardProps) {
 	return (
 		<div
-			className={`rounded-xl border border-app-border bg-app-panel transition-colors ${className}`}
+			style={delay === undefined ? undefined : { animationDelay: `${delay}ms` }}
+			className={`rounded-xl border border-app-border bg-app-panel transition-colors ${
+				delay === undefined ? "" : "animate-rise"
+			} ${className}`}
 		>
 			{children}
 		</div>

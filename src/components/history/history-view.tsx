@@ -76,7 +76,7 @@ export function HistoryView({ initial }: HistoryViewProps) {
 
 	return (
 		<div className="flex flex-col gap-4">
-			<div className="flex flex-wrap items-center justify-between gap-3">
+			<div className="flex animate-rise flex-wrap items-center justify-between gap-3">
 				<h1 className="text-lg font-semibold tracking-tight">Előzmények</h1>
 				<SegmentedControl
 					label="Időszak"
@@ -86,7 +86,10 @@ export function HistoryView({ initial }: HistoryViewProps) {
 				/>
 			</div>
 
-			<Card className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-4 sm:p-5">
+			<Card
+				className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-4 sm:p-5"
+				delay={60}
+			>
 				<Stat
 					label="Fogyasztás"
 					value={`${formatKwh(data.totalKwh)} kWh`}
@@ -110,6 +113,7 @@ export function HistoryView({ initial }: HistoryViewProps) {
 			</Card>
 
 			<Card
+				delay={130}
 				className={`flex flex-col gap-4 p-4 transition-opacity duration-200 sm:p-5 ${
 					loading ? "opacity-50" : "opacity-100"
 				}`}
@@ -131,6 +135,7 @@ export function HistoryView({ initial }: HistoryViewProps) {
 					series={data.devices}
 					labelInterval={LABEL_INTERVAL[data.range]}
 					metric={metric}
+					animate
 				/>
 			</Card>
 
@@ -146,10 +151,14 @@ function DeviceBreakdown({ data }: { data: HistoryResponse }) {
 	}
 
 	return (
-		<Card className="flex flex-col gap-4 p-4 sm:p-5">
+		<Card className="flex flex-col gap-4 p-4 sm:p-5" delay={200}>
 			<h2 className="text-sm font-semibold">Megoszlás</h2>
 			<div className="flex flex-col gap-3">
-				{data.deviceTotals.map((device, index) => (
+				{data.deviceTotals.map((device) => {
+					const colorIndex = data.devices.findIndex(
+						(entry) => entry.slug === device.slug,
+					);
+					return (
 					<div key={device.slug} className="flex flex-col gap-1.5">
 						<div className="flex items-baseline justify-between gap-3">
 							<span className="flex items-center gap-2 text-sm">
@@ -157,7 +166,7 @@ function DeviceBreakdown({ data }: { data: HistoryResponse }) {
 									className="size-2 shrink-0 rounded-full"
 									style={{
 										backgroundColor:
-											SERIES_COLORS[index % SERIES_COLORS.length],
+											SERIES_COLORS[colorIndex % SERIES_COLORS.length],
 									}}
 								/>
 								{device.name}
@@ -178,12 +187,13 @@ function DeviceBreakdown({ data }: { data: HistoryResponse }) {
 								style={{
 									width: `${device.share * 100}%`,
 									backgroundColor:
-										SERIES_COLORS[index % SERIES_COLORS.length],
+										SERIES_COLORS[colorIndex % SERIES_COLORS.length],
 								}}
 							/>
 						</div>
 					</div>
-				))}
+					);
+				})}
 			</div>
 		</Card>
 	);
@@ -197,7 +207,7 @@ function BucketTable({ data }: { data: HistoryResponse }) {
 	}
 
 	return (
-		<Card className="overflow-hidden">
+		<Card className="overflow-hidden" delay={270}>
 			<div className="overflow-x-auto">
 				<table className="w-full text-sm">
 					<thead>

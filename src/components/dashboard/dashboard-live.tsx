@@ -54,7 +54,7 @@ export function DashboardLive({
 						plugs.live ? "opacity-100" : "opacity-60"
 					}`}
 				>
-					{plugs.data.plugs.map((plug) => (
+					{plugs.data.plugs.map((plug, index) => (
 						<PlugCard
 							key={plug.slug}
 							plug={plug}
@@ -63,6 +63,7 @@ export function DashboardLive({
 							subDevices={plugs.data.plugs.filter(
 								(other) => other.parentSlug === plug.slug,
 							)}
+							delay={80 + index * 70}
 						/>
 					))}
 				</div>

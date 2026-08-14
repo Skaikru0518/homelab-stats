@@ -36,7 +36,7 @@ export function DeviceDetailView({ initial }: DeviceDetailViewProps) {
 
 	return (
 		<div className="flex flex-col gap-4">
-			<div className="flex flex-wrap items-center justify-between gap-3">
+			<div className="flex animate-rise flex-wrap items-center justify-between gap-3">
 				<div className="flex items-center gap-2.5">
 					<StatusDot online={data.live.online} pulse={live} />
 					<h1 className="text-lg font-semibold tracking-tight">{data.name}</h1>
@@ -52,7 +52,7 @@ export function DeviceDetailView({ initial }: DeviceDetailViewProps) {
 			</div>
 
 			{data.live.online ? (
-				<Card className="flex flex-col gap-4 p-4 sm:p-6">
+				<Card className="flex flex-col gap-4 p-4 sm:p-6" delay={60}>
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 						<div className="flex flex-col gap-2">
 							<Label>Jelenlegi teljesítmény</Label>
@@ -81,7 +81,7 @@ export function DeviceDetailView({ initial }: DeviceDetailViewProps) {
 					<LoadBar current={data.live.current} />
 				</Card>
 			) : (
-				<Card className="flex flex-col gap-1.5 p-6">
+				<Card className="flex flex-col gap-1.5 p-6" delay={60}>
 					<p className="flex items-center gap-2 text-sm font-medium text-rose-600 dark:text-rose-400">
 						<WifiOff size={16} aria-hidden="true" />
 						Nem érhető el
@@ -91,12 +91,12 @@ export function DeviceDetailView({ initial }: DeviceDetailViewProps) {
 			)}
 
 			<div className="grid gap-4 sm:grid-cols-3">
-				<PeriodCard label="Ma" totals={data.today} />
-				<PeriodCard label="Utolsó 7 nap" totals={data.last7} />
-				<PeriodCard label="Utolsó 30 nap" totals={data.last30} />
+				<PeriodCard label="Ma" totals={data.today} delay={110} />
+				<PeriodCard label="Utolsó 7 nap" totals={data.last7} delay={150} />
+				<PeriodCard label="Utolsó 30 nap" totals={data.last30} delay={190} />
 			</div>
 
-			<Card className="flex flex-col gap-4 p-4 sm:p-5">
+			<Card className="flex flex-col gap-4 p-4 sm:p-5" delay={200}>
 				<div className="flex items-baseline justify-between">
 					<h2 className="text-sm font-semibold">Teljesítmény</h2>
 					<span className="text-[11px] text-app-faint">
@@ -110,7 +110,7 @@ export function DeviceDetailView({ initial }: DeviceDetailViewProps) {
 				/>
 			</Card>
 
-			<Card className="flex flex-col gap-4 p-4 sm:p-5">
+			<Card className="flex flex-col gap-4 p-4 sm:p-5" delay={260}>
 				<div className="flex items-baseline justify-between">
 					<h2 className="text-sm font-semibold">Napi fogyasztás</h2>
 					<span className="text-[11px] text-app-faint">utolsó 30 nap</span>
@@ -135,12 +135,14 @@ export function DeviceDetailView({ initial }: DeviceDetailViewProps) {
 function PeriodCard({
 	label,
 	totals,
+	delay,
 }: {
 	label: string;
 	totals: DeviceDetailResponse["today"];
+	delay: number;
 }) {
 	return (
-		<Card className="flex flex-col gap-1 p-4">
+		<Card className="flex flex-col gap-1 p-4" delay={delay}>
 			<Label>{label}</Label>
 			<span className="font-mono text-xl font-semibold tabular-nums">
 				{formatKwh(totals.kwh)} kWh
@@ -163,7 +165,7 @@ function DailyTable({ rows }: { rows: DeviceDetailResponse["daily"] }) {
 	}
 
 	return (
-		<Card className="overflow-hidden">
+		<Card className="overflow-hidden" delay={320}>
 			<div className="overflow-x-auto">
 				<table className="w-full text-sm">
 					<thead>
