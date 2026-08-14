@@ -279,7 +279,7 @@ function DeleteDialog({
 
 	return (
 		<div
-			className={`fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 backdrop-blur-[2px] sm:items-center ${
+			className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px] ${
 				leaving ? "animate-scrim-out" : "animate-scrim-in"
 			}`}
 		>
