@@ -1,3 +1,4 @@
+import { MobileNav } from "@/components/shell/mobile-nav";
 import { NavLinks } from "@/components/shell/nav-links";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Zap } from "lucide-react";
@@ -13,14 +14,14 @@ export function TopBar() {
 						className="shrink-0 fill-emerald-500 text-emerald-500"
 						aria-hidden="true"
 					/>
-					{/* Mobilon a két menüpont mellett nem fér ki a névsor. */}
-					<span className="hidden text-base font-semibold tracking-tight sm:inline">
+					<span className="text-base font-semibold tracking-tight">
 						Otthoni energia
 					</span>
 				</Link>
 				<div className="flex items-center gap-2">
 					<NavLinks />
 					<ThemeToggle />
+					<MobileNav />
 				</div>
 			</div>
 		</header>

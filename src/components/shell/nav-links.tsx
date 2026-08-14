@@ -1,12 +1,13 @@
 "use client";
 
+import { ChartColumn, LayoutDashboard, PlugZap } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export const NAV_LINKS = [
-	{ href: "/", label: "Áttekintés" },
-	{ href: "/history", label: "Előzmények" },
-	{ href: "/devices", label: "Eszközök" },
+	{ href: "/", label: "Áttekintés", icon: LayoutDashboard },
+	{ href: "/history", label: "Előzmények", icon: ChartColumn },
+	{ href: "/devices", label: "Eszközök", icon: PlugZap },
 ] as const;
 
 /** Az eszköz oldalak az áttekintés alá tartoznak. */
