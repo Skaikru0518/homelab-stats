@@ -27,6 +27,11 @@ export const formatKwh = (value: number): string => format(value, 2);
 /** Költség forintban, egészre kerekítve. */
 export const formatHuf = (value: number): string => format(value, 0);
 
+/** Egységár, legfeljebb három tizedessel, fölösleges nullák nélkül. */
+export function formatPrice(value: number): string {
+	return format(value, 3).replace(/,?0+$/, "");
+}
+
 /** Feszültség voltban. */
 export const formatVolts = (value: number): string => format(value, 0);
 

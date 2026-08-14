@@ -28,6 +28,11 @@ export type {
 	HistoryRange,
 	HistoryResponse,
 } from "./history";
+export type {
+	PriceFieldErrors,
+	PriceListItem,
+	PriceMutationResult,
+} from "./price-admin";
 export type { DeviceStats, StatsResponse } from "./stats";
 export type { TasmotaEnergy } from "./tasmota";
 export type { PlugLiveStatus, PlugsResponse } from "./plug";
