@@ -1,6 +1,7 @@
 "use client";
 
 import { PlugCard } from "@/components/plug/plug-card";
+import { api } from "@/lib/api";
 import { SummaryBar } from "@/components/summary/summary-bar";
 import type { PlugsResponse, StatsResponse } from "@/interface";
 import { usePolling } from "@/lib/use-polling";
@@ -19,12 +20,12 @@ export function DashboardLive({
 	initialStats,
 }: DashboardLiveProps) {
 	const plugs = usePolling<PlugsResponse>(
-		"/api/plugs",
+		api("/api/plugs"),
 		PLUGS_INTERVAL_MS,
 		initialPlugs,
 	);
 	const stats = usePolling<StatsResponse>(
-		"/api/stats",
+		api("/api/stats"),
 		STATS_INTERVAL_MS,
 		initialStats,
 	);

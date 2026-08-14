@@ -1,6 +1,7 @@
 "use client";
 
 import { DeviceForm } from "@/components/devices/device-form";
+import { api } from "@/lib/api";
 import { StatusDot } from "@/components/plug/status-dot";
 import { Card } from "@/components/ui/card";
 import type { DeviceListItem } from "@/interface";
@@ -261,7 +262,7 @@ function DeleteDialog({
 		setBusy(true);
 		setError(null);
 		try {
-			const response = await fetch(`/api/device/${device.slug}`, {
+			const response = await fetch(api(`/api/device/${device.slug}`), {
 				method: "DELETE",
 			});
 			const result = await response.json();

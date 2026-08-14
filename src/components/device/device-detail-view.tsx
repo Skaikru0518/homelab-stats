@@ -1,6 +1,7 @@
 "use client";
 
 import { EnergyBarChart } from "@/components/chart/energy-bar-chart";
+import { api } from "@/lib/api";
 import { PowerAreaChart } from "@/components/chart/power-area-chart";
 import { LoadBar } from "@/components/plug/load-bar";
 import { StatusDot } from "@/components/plug/status-dot";
@@ -27,7 +28,7 @@ interface DeviceDetailViewProps {
 
 export function DeviceDetailView({ initial }: DeviceDetailViewProps) {
 	const { data, live } = usePolling<DeviceDetailResponse>(
-		`/api/device/${initial.slug}`,
+		api(`/api/device/${initial.slug}`),
 		REFRESH_MS,
 		initial,
 	);

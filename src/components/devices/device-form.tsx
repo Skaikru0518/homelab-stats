@@ -1,6 +1,7 @@
 "use client";
 
 import type { DeviceListItem, FieldErrors } from "@/interface";
+import { api } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
@@ -37,7 +38,9 @@ export function DeviceForm({ device, all, onDone, onCancel }: DeviceFormProps) {
 		setSaving(true);
 		setErrors({});
 
-		const url = isEdit ? `/api/device/${device.slug}` : "/api/devices";
+		const url = isEdit
+			? api(`/api/device/${device.slug}`)
+			: api("/api/devices");
 		const payload = isEdit
 			? { name, host, enabled, parentSlug }
 			: { slug, name, host, enabled, parentSlug };

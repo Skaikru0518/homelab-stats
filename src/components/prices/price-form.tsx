@@ -1,6 +1,7 @@
 "use client";
 
 import type { PriceFieldErrors, PriceListItem } from "@/interface";
+import { api } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
@@ -32,7 +33,7 @@ export function PriceForm({ price, onDone, onCancel }: PriceFormProps) {
 
 		try {
 			const response = await fetch(
-				isEdit ? `/api/prices/${price.id}` : "/api/prices",
+				isEdit ? api(`/api/prices/${price.id}`) : api("/api/prices"),
 				{
 					method: isEdit ? "PATCH" : "POST",
 					headers: { "Content-Type": "application/json" },

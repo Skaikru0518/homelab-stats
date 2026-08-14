@@ -1,6 +1,7 @@
 "use client";
 
 import { SERIES_COLORS } from "@/components/chart/chart-theme";
+import { api } from "@/lib/api";
 import {
 	type ChartMetric,
 	EnergyBarChart,
@@ -53,7 +54,7 @@ export function HistoryView({ initial }: HistoryViewProps) {
 		let cancelled = false;
 		setLoading(true);
 
-		fetch(`/api/history?range=${range}`, { cache: "no-store" })
+		fetch(api(`/api/history?range=${range}`), { cache: "no-store" })
 			.then((response) => response.json() as Promise<HistoryResponse>)
 			.then((next) => {
 				if (!cancelled) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { PriceForm } from "@/components/prices/price-form";
+import { api } from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import type { PriceListItem } from "@/interface";
 import { formatPrice } from "@/lib/format";
@@ -210,7 +211,7 @@ function DeleteDialog({
 		setBusy(true);
 		setError(null);
 		try {
-			const response = await fetch(`/api/prices/${price.id}`, {
+			const response = await fetch(api(`/api/prices/${price.id}`), {
 				method: "DELETE",
 			});
 			const result = await response.json();
