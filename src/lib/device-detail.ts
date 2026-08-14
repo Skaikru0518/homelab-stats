@@ -47,14 +47,23 @@ function sum(rows: DeviceDailyRow[]): PeriodTotals {
 export async function getDeviceDetail(
 	slug: string,
 ): Promise<DeviceDetailResponse | null> {
-	const device = await prisma.device.findUnique({
+	const found = await prisma.device.findUnique({
 		where: { slug },
-		select: { id: true, slug: true, name: true, host: true, enabled: true },
+		select: {
+			id: true,
+			slug: true,
+			name: true,
+			host: true,
+			enabled: true,
+			parent: { select: { slug: true } },
+		},
 	});
 
-	if (!device) {
+	if (!found) {
 		return null;
 	}
+
+	const device = { ...found, parentSlug: found.parent?.slug ?? null };
 
 	const [todayRow] = await prisma.$queryRaw<TodayRow[]>`
 		SELECT (now() AT TIME ZONE ${TIME_ZONE})::date AS today
@@ -123,11 +132,13 @@ async function readLive(device: {
 	slug: string;
 	name: string;
 	host: string;
+	parentSlug: string | null;
 }): Promise<PlugLiveStatus> {
 	const identity = {
 		slug: device.slug,
 		name: device.name,
 		host: device.host,
+		parentSlug: device.parentSlug,
 	};
 
 	try {

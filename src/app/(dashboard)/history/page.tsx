@@ -8,5 +8,5 @@ export const metadata = {
 };
 
 export default async function HistoryPage() {
-	return <HistoryView initial={await getHistory("week")} />;
+	return <HistoryView initial={await getHistory("month")} />;
 }

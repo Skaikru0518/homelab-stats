@@ -59,6 +59,10 @@ export function DashboardLive({
 							key={plug.slug}
 							plug={plug}
 							stats={statsBySlug.get(plug.slug)}
+							windowHours={stats.data.windowHours}
+							subDevices={plugs.data.plugs.filter(
+								(other) => other.parentSlug === plug.slug,
+							)}
 						/>
 					))}
 				</div>

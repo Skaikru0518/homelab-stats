@@ -3,23 +3,26 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const LINKS = [
+export const NAV_LINKS = [
 	{ href: "/", label: "Áttekintés" },
 	{ href: "/history", label: "Előzmények" },
 	{ href: "/devices", label: "Eszközök" },
 ] as const;
 
+/** Az eszköz oldalak az áttekintés alá tartoznak. */
+export function isActive(href: string, pathname: string): boolean {
+	return href === "/"
+		? pathname === "/" || pathname.startsWith("/device/")
+		: pathname.startsWith(href);
+}
+
 export function NavLinks() {
 	const pathname = usePathname();
 
 	return (
-		<nav className="flex gap-1 rounded-lg border border-app-border bg-app-panel p-1">
-			{LINKS.map((link) => {
-				// Az eszköz oldalak az áttekintés alá tartoznak.
-				const active =
-					link.href === "/"
-						? pathname === "/" || pathname.startsWith("/device")
-						: pathname.startsWith(link.href);
+		<nav className="hidden gap-1 rounded-lg border border-app-border bg-app-panel p-1 sm:flex">
+			{NAV_LINKS.map((link) => {
+				const active = isActive(link.href, pathname);
 
 				return (
 					<Link

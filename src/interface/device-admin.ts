@@ -3,6 +3,10 @@ export interface DeviceListItem {
 	name: string;
 	host: string;
 	enabled: boolean;
+	/** Null, ha önálló mérés. Egyébként a szülő slugja. */
+	parentSlug: string | null;
+	/** A közvetlen gyerekek slugjai. */
+	childSlugs: string[];
 	/** Hány nyers mérés tartozik hozzá. Törlésnél ennyit veszítenél. */
 	readingCount: number;
 	/** Null, ha kikapcsolt eszköz — azt nem kérdezzük le. */
@@ -14,7 +18,7 @@ export interface DeviceListItem {
 
 /** Mezőnkénti hibaüzenetek. A kulcs a mező neve. */
 export type FieldErrors = Partial<
-	Record<"slug" | "name" | "host" | "form", string>
+	Record<"slug" | "name" | "host" | "parentSlug" | "form", string>
 >;
 
 export type MutationResult =

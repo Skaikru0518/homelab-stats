@@ -5,7 +5,7 @@ import { StatusDot } from "@/components/plug/status-dot";
 import { Card } from "@/components/ui/card";
 import type { DeviceListItem } from "@/interface";
 import { formatWatts } from "@/lib/format";
-import { LineChart, Pencil, Plus, Trash2 } from "lucide-react";
+import { CornerDownRight, LineChart, Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -65,6 +65,7 @@ export function DevicesTable({ devices }: DevicesTableProps) {
 					<DeviceForm
 						key={editing.mode === "edit" ? editing.slug : "create"}
 						device={editTarget}
+						all={devices}
 						onDone={done}
 						onCancel={() => setEditing(null)}
 					/>
@@ -97,12 +98,26 @@ export function DevicesTable({ devices }: DevicesTableProps) {
 											<Status device={device} />
 										</Td>
 										<Td>
-											<Link
-												href={`/device/${device.slug}`}
-												className="font-medium transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
-											>
-												{device.name}
-											</Link>
+											<span className="flex items-center gap-1.5">
+												{device.parentSlug && (
+													<CornerDownRight
+														size={13}
+														className="shrink-0 text-app-faint"
+														aria-hidden="true"
+													/>
+												)}
+												<Link
+													href={`/device/${device.slug}`}
+													className="font-medium transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+												>
+													{device.name}
+												</Link>
+											</span>
+											{device.parentSlug && (
+												<span className="block text-[11px] text-app-faint">
+													{device.parentSlug} mérésén belül
+												</span>
+											)}
 										</Td>
 										<Td mono muted>
 											{device.slug}

@@ -18,6 +18,7 @@ const MONTH_COUNT = 12;
 interface DailyRow {
 	date: Date;
 	slug: string;
+	isRoot: boolean;
 	kwh: number;
 	costHuf: number;
 	costBlendedHuf: number;
@@ -80,6 +81,7 @@ export async function getHistory(
 			SELECT
 				de."date",
 				d."slug",
+				(d."parentId" IS NULL) AS "isRoot",
 				de."kwh"::double precision AS kwh,
 				de."costHuf"::double precision AS "costHuf",
 				de."costBlendedHuf"::double precision AS "costBlendedHuf"
@@ -123,7 +125,9 @@ export async function getHistory(
 		const full = dayKey(row.date);
 
 		if (full < fromKey) {
-			previousKwh += row.kwh;
+			if (row.isRoot) {
+				previousKwh += row.kwh;
+			}
 			continue;
 		}
 
@@ -132,9 +136,13 @@ export async function getHistory(
 			continue;
 		}
 
-		bucket.kwh += row.kwh;
-		bucket.costHuf += row.costHuf;
-		bucket.costBlendedHuf += row.costBlendedHuf;
+		// A gyerek eszközök adata látszik a bontásban, de nem megy az összegbe.
+		if (row.isRoot) {
+			bucket.kwh += row.kwh;
+			bucket.costHuf += row.costHuf;
+			bucket.costBlendedHuf += row.costBlendedHuf;
+		}
+
 		bucket.byDevice[row.slug] = (bucket.byDevice[row.slug] ?? 0) + row.kwh;
 		bucket.costByDevice[row.slug] =
 			(bucket.costByDevice[row.slug] ?? 0) + row.costHuf;

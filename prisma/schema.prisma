@@ -19,8 +19,14 @@ model Device {
   host    String
   enabled Boolean @default(true)
 
+  /// Ha ki van töltve, ez az eszköz a szülő mérésén belül van — nem számít külön az összesítésbe.
+  parentId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  parent   Device?  @relation("DeviceHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Device[] @relation("DeviceHierarchy")
 
   readings Reading[]
   daily    DailyEnergy[]

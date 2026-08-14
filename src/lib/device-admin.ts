@@ -26,6 +26,7 @@ interface DeviceInput {
 	name?: unknown;
 	host?: unknown;
 	enabled?: unknown;
+	parentSlug?: unknown;
 }
 
 interface CleanDevice {
@@ -33,6 +34,7 @@ interface CleanDevice {
 	name: string;
 	host: string;
 	enabled: boolean;
+	parentSlug: string | null;
 }
 
 function isValidIpv4(host: string): boolean {
@@ -90,7 +92,59 @@ function validate(
 		clean.enabled = Boolean(input.enabled);
 	}
 
+	if (input.parentSlug !== undefined) {
+		const parent = String(input.parentSlug ?? "").trim();
+		clean.parentSlug = parent.length === 0 ? null : parent;
+	}
+
 	return { errors, clean };
+}
+
+/**
+ * A szülő létezik, nem önmaga, és nincs neki is szülője.
+ * Egy szint elég: egy elosztó egy méréshalmazba tartozik, nem láncba.
+ */
+async function resolveParent(
+	parentSlug: string | null,
+	ownSlug: string | null,
+): Promise<{ error?: string; parentId: string | null }> {
+	if (parentSlug === null) {
+		return { parentId: null };
+	}
+
+	if (parentSlug === ownSlug) {
+		return { error: "Egy eszköz nem lehet a saját szülője.", parentId: null };
+	}
+
+	const parent = await prisma.device.findUnique({
+		where: { slug: parentSlug },
+		select: { id: true, parentId: true },
+	});
+
+	if (!parent) {
+		return { error: "Nincs ilyen eszköz.", parentId: null };
+	}
+
+	if (parent.parentId !== null) {
+		return {
+			error: "A választott eszköz maga is egy másik mérésén belül van.",
+			parentId: null,
+		};
+	}
+
+	if (ownSlug !== null) {
+		const ownChildren = await prisma.device.count({
+			where: { parent: { slug: ownSlug } },
+		});
+		if (ownChildren > 0) {
+			return {
+				error: "Ennek az eszköznek már vannak gyerekei, nem lehet másé.",
+				parentId: null,
+			};
+		}
+	}
+
+	return { parentId: parent.id };
 }
 
 export async function listDevices(): Promise<DeviceListItem[]> {
@@ -101,6 +155,8 @@ export async function listDevices(): Promise<DeviceListItem[]> {
 			name: true,
 			host: true,
 			enabled: true,
+			parent: { select: { slug: true } },
+			children: { select: { slug: true }, orderBy: { slug: "asc" } },
 			_count: { select: { readings: true } },
 		},
 	});
@@ -112,6 +168,8 @@ export async function listDevices(): Promise<DeviceListItem[]> {
 				name: device.name,
 				host: device.host,
 				enabled: device.enabled,
+				parentSlug: device.parent?.slug ?? null,
+				childSlugs: device.children.map((child) => child.slug),
 				readingCount: device._count.readings,
 			};
 
@@ -154,12 +212,18 @@ export async function createDevice(input: DeviceInput): Promise<MutationResult> 
 		return { ok: false, errors: { slug: "Ez az azonosító már foglalt." } };
 	}
 
+	const parent = await resolveParent(clean.parentSlug ?? null, null);
+	if (parent.error) {
+		return { ok: false, errors: { parentSlug: parent.error } };
+	}
+
 	const device = await prisma.device.create({
 		data: {
 			slug: clean.slug as string,
 			name: clean.name as string,
 			host: clean.host as string,
 			enabled: clean.enabled ?? true,
+			parentId: parent.parentId,
 		},
 		select: { slug: true },
 	});
@@ -187,9 +251,19 @@ export async function updateDevice(
 	}
 
 	// A slug stabil azonosító, arra hivatkoznak a linkek és a mentett adatok.
-	const { slug: _ignored, ...updatable } = clean;
+	const { slug: _ignored, parentSlug, ...updatable } = clean;
 
-	await prisma.device.update({ where: { slug }, data: updatable });
+	const data: Record<string, unknown> = { ...updatable };
+
+	if (parentSlug !== undefined) {
+		const parent = await resolveParent(parentSlug, slug);
+		if (parent.error) {
+			return { ok: false, errors: { parentSlug: parent.error } };
+		}
+		data["parentId"] = parent.parentId;
+	}
+
+	await prisma.device.update({ where: { slug }, data });
 
 	return { ok: true, slug };
 }

@@ -1,5 +1,7 @@
 export interface DeviceStats {
 	slug: string;
+	/** Null, ha önálló mérés. Egyébként a szülő slugja. */
+	parentSlug: string | null;
 	todayKwh: number;
 	/** Mai költség határáron. */
 	todayCostHuf: number;

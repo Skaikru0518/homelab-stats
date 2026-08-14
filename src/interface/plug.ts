@@ -2,6 +2,8 @@ interface PlugIdentity {
 	slug: string;
 	name: string;
 	host: string;
+	/** Null, ha önálló mérés. Egyébként a szülő slugja — nem számít az összesítésbe. */
+	parentSlug: string | null;
 }
 
 /** Egy konnektor élő állapota. Az `online` diszkriminálja a két ágat. */
@@ -28,7 +30,7 @@ export type PlugLiveStatus =
 /** A `/api/plugs` válasza. Az időbélyeg ISO string — JSON-ön át nem marad Date. */
 export interface PlugsResponse {
 	ts: string;
-	/** Az elérhető konnektorok pillanatnyi összteljesítménye, W. */
+	/** Pillanatnyi összteljesítmény, W. Csak a gyökér eszközök — a gyerekek benne vannak a szülőben. */
 	totalPower: number;
 	plugs: PlugLiveStatus[];
 }

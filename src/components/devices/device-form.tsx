@@ -7,19 +7,30 @@ import { useState } from "react";
 interface DeviceFormProps {
 	/** Meglévő eszköz szerkesztéshez, vagy null új felvételhez. */
 	device: DeviceListItem | null;
+	/** Az összes eszköz — ebből választható a szülő. */
+	all: DeviceListItem[];
 	onDone: () => void;
 	onCancel: () => void;
 }
 
-export function DeviceForm({ device, onDone, onCancel }: DeviceFormProps) {
+export function DeviceForm({ device, all, onDone, onCancel }: DeviceFormProps) {
 	const isEdit = device !== null;
 
 	const [slug, setSlug] = useState(device?.slug ?? "");
 	const [name, setName] = useState(device?.name ?? "");
 	const [host, setHost] = useState(device?.host ?? "");
 	const [enabled, setEnabled] = useState(device?.enabled ?? true);
+	const [parentSlug, setParentSlug] = useState(device?.parentSlug ?? "");
 	const [errors, setErrors] = useState<FieldErrors>({});
 	const [saving, setSaving] = useState(false);
+
+	const hasChildren = (device?.childSlugs.length ?? 0) > 0;
+
+	// Szülő csak olyan lehet, aminek nincs szülője, és nem önmaga.
+	const parentOptions = all.filter(
+		(candidate) =>
+			candidate.slug !== device?.slug && candidate.parentSlug === null,
+	);
 
 	async function submit(event: React.FormEvent) {
 		event.preventDefault();
@@ -28,8 +39,8 @@ export function DeviceForm({ device, onDone, onCancel }: DeviceFormProps) {
 
 		const url = isEdit ? `/api/device/${device.slug}` : "/api/devices";
 		const payload = isEdit
-			? { name, host, enabled }
-			: { slug, name, host, enabled };
+			? { name, host, enabled, parentSlug }
+			: { slug, name, host, enabled, parentSlug };
 
 		try {
 			const response = await fetch(url, {
@@ -95,6 +106,32 @@ export function DeviceForm({ device, onDone, onCancel }: DeviceFormProps) {
 						inputMode="decimal"
 						className={inputClass(errors.host)}
 					/>
+				</Field>
+			</div>
+
+			<div className="grid gap-4 sm:grid-cols-3">
+				<Field
+					label="Része egy másik mérésnek"
+					hint={
+						hasChildren
+							? "Ennek az eszköznek már vannak gyerekei"
+							: "Ha egy másik konnektor elosztóján lóg"
+					}
+					error={errors.parentSlug}
+				>
+					<select
+						value={parentSlug}
+						onChange={(event) => setParentSlug(event.target.value)}
+						disabled={hasChildren}
+						className={inputClass(errors.parentSlug)}
+					>
+						<option value="">Önálló mérés</option>
+						{parentOptions.map((candidate) => (
+							<option key={candidate.slug} value={candidate.slug}>
+								{candidate.name}
+							</option>
+						))}
+					</select>
 				</Field>
 			</div>
 

@@ -9,11 +9,21 @@ import { fetchTasmotaEnergy } from "./tasmota";
  * `online: false`-szal jön vissza, a többi adata épen marad.
  */
 export async function getLivePlugs(): Promise<PlugsResponse> {
-	const devices = await prisma.device.findMany({
+	const rows = await prisma.device.findMany({
 		where: { enabled: true },
 		orderBy: { slug: "asc" },
-		select: { slug: true, name: true, host: true },
+		select: {
+			slug: true,
+			name: true,
+			host: true,
+			parent: { select: { slug: true } },
+		},
 	});
+
+	const devices = rows.map(({ parent, ...rest }) => ({
+		...rest,
+		parentSlug: parent?.slug ?? null,
+	}));
 
 	const plugs: PlugLiveStatus[] = await Promise.all(
 		devices.map(async (device): Promise<PlugLiveStatus> => {
@@ -41,8 +51,10 @@ export async function getLivePlugs(): Promise<PlugsResponse> {
 		}),
 	);
 
+	// A gyerekek fogyasztása benne van a szülő mérésében, különben duplán számolnánk.
 	const totalPower = plugs.reduce(
-		(sum, plug) => (plug.online ? sum + plug.power : sum),
+		(sum, plug) =>
+			plug.online && plug.parentSlug === null ? sum + plug.power : sum,
 		0,
 	);
 

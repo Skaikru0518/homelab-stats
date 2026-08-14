@@ -1,35 +1,32 @@
 import type { DeviceModel } from "@/generated/prisma/models/Device";
 import type { AssertTrue, Equals } from "./_assert";
 
-/** Egy fizikai eszköz (Tasmota konnektor). */
 export interface Device {
 	id: string;
-	/** Stabil, kódból hivatkozható azonosító, pl. "plug-1". */
 	slug: string;
-	/** Felhasználó által átírható megjelenített név. */
 	name: string;
-	/** IP cím vagy hostname, pl. "192.168.50.250". */
 	host: string;
 	enabled: boolean;
+	/** Ha ki van töltve, ez az eszköz a szülő mérésén belül van. */
+	parentId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }
 
-/** Új eszköz létrehozása. Az id és az időbélyegek a DB-től jönnek. */
 export interface CreateDeviceDto {
 	slug: string;
 	name: string;
 	host: string;
-	/** Alapértelmezés: true. */
 	enabled?: boolean;
+	parentSlug?: string | null;
 }
 
-/** Eszköz módosítása. A slug szándékosan nem módosítható — arra hivatkozik a kód. */
+/** A slug nem módosítható — arra hivatkoznak a linkek és a kód. */
 export interface UpdateDeviceDto {
 	name?: string;
 	host?: string;
 	enabled?: boolean;
+	parentSlug?: string | null;
 }
 
-/** Fordítási idejű őr: eltér a séma? -> tsc hiba. */
 type _DeviceMatchesSchema = AssertTrue<Equals<DeviceModel, Device>>;

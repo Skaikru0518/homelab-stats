@@ -10,6 +10,7 @@ export const BUCKET_COUNT = 96;
 interface TodayRow {
 	id: string;
 	slug: string;
+	parentSlug: string | null;
 	kwh: number;
 	costHuf: number;
 	costBlendedHuf: number;
@@ -25,10 +26,12 @@ export async function getStats(): Promise<StatsResponse> {
 		SELECT
 			d."id",
 			d."slug",
+			p."slug" AS "parentSlug",
 			COALESCE(de."kwh", 0)::double precision AS kwh,
 			COALESCE(de."costHuf", 0)::double precision AS "costHuf",
 			COALESCE(de."costBlendedHuf", 0)::double precision AS "costBlendedHuf"
 		FROM "Device" d
+		LEFT JOIN "Device" p ON p."id" = d."parentId"
 		LEFT JOIN "DailyEnergy" de
 			ON de."deviceId" = d."id"
 			AND de."date" = (now() AT TIME ZONE ${TIME_ZONE})::date
@@ -54,6 +57,7 @@ export async function getStats(): Promise<StatsResponse> {
 
 	const devices: DeviceStats[] = todayRows.map((row) => ({
 		slug: row.slug,
+		parentSlug: row.parentSlug,
 		todayKwh: row.kwh,
 		todayCostHuf: row.costHuf,
 		todayCostBlendedHuf: row.costBlendedHuf,
@@ -61,11 +65,14 @@ export async function getStats(): Promise<StatsResponse> {
 		peakWatts: peakByDevice.get(row.id) ?? null,
 	}));
 
+	// A gyerekek mérése benne van a szülőében — csak a gyökereket összegezzük.
+	const roots = devices.filter((device) => device.parentSlug === null);
+
 	return {
 		windowHours: WINDOW_HOURS,
-		totalTodayKwh: devices.reduce((sum, d) => sum + d.todayKwh, 0),
-		totalTodayCostHuf: devices.reduce((sum, d) => sum + d.todayCostHuf, 0),
-		totalTodayCostBlendedHuf: devices.reduce(
+		totalTodayKwh: roots.reduce((sum, d) => sum + d.todayKwh, 0),
+		totalTodayCostHuf: roots.reduce((sum, d) => sum + d.todayCostHuf, 0),
+		totalTodayCostBlendedHuf: roots.reduce(
 			(sum, d) => sum + d.todayCostBlendedHuf,
 			0,
 		),

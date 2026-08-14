@@ -18,10 +18,25 @@ import Link from "next/link";
 interface PlugCardProps {
 	plug: PlugLiveStatus;
 	stats: DeviceStats | undefined;
+	windowHours: number;
+	/** Az eszközök, amiknek a mérése ezen belül van. */
+	subDevices: PlugLiveStatus[];
 }
 
-export function PlugCard({ plug, stats }: PlugCardProps) {
+export function PlugCard({
+	plug,
+	stats,
+	windowHours,
+	subDevices,
+}: PlugCardProps) {
 	const peakWatts = stats?.peakWatts ?? null;
+
+	const measuredChildren = subDevices.filter((child) => child.online);
+	const childTotal = measuredChildren.reduce(
+		(sum, child) => sum + child.power,
+		0,
+	);
+	const remainder = plug.online ? plug.power - childTotal : 0;
 
 	return (
 		<Card className="flex flex-col gap-4 p-4 sm:p-5">
@@ -43,6 +58,12 @@ export function PlugCard({ plug, stats }: PlugCardProps) {
 				</span>
 			</div>
 
+			{plug.parentSlug && (
+				<p className="-mt-2 text-[11px] text-app-faint">
+					Része ennek: {plug.parentSlug} — nem számít külön az összesítésbe
+				</p>
+			)}
+
 			{plug.online ? (
 				<>
 					<div className="flex items-baseline gap-1.5">
@@ -54,9 +75,28 @@ export function PlugCard({ plug, stats }: PlugCardProps) {
 
 					<LoadBar current={plug.current} />
 
+					{measuredChildren.length > 0 && (
+						<dl className="flex flex-col gap-1 rounded-lg bg-app-inset p-3">
+							{measuredChildren.map((child) => (
+								<div key={child.slug} className="flex justify-between text-xs">
+									<dt className="text-app-muted">{child.name}</dt>
+									<dd className="font-mono tabular-nums">
+										{formatWatts(child.power)} W
+									</dd>
+								</div>
+							))}
+							<div className="flex justify-between border-t border-app-border pt-1 text-xs">
+								<dt className="text-app-muted">Egyéb</dt>
+								<dd className="font-mono font-semibold tabular-nums">
+									{formatWatts(Math.max(remainder, 0))} W
+								</dd>
+							</div>
+						</dl>
+					)}
+
 					<div className="flex flex-col gap-1">
 						<div className="flex items-baseline justify-between">
-							<Label>24 óra</Label>
+							<Label>{windowHours} óra</Label>
 							<span className="font-mono text-[11px] text-app-faint">
 								{peakWatts === null ? "gyűlik az adat" : `csúcs ${formatWatts(peakWatts)} W`}
 							</span>
@@ -64,6 +104,7 @@ export function PlugCard({ plug, stats }: PlugCardProps) {
 						<Sparkline
 							data={stats?.series ?? []}
 							gradientId={`spark-${plug.slug}`}
+							windowHours={windowHours}
 						/>
 					</div>
 

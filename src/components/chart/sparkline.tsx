@@ -1,20 +1,24 @@
 "use client";
 
-import { SERIES_COLORS } from "@/components/chart/chart-theme";
-import { Area, AreaChart, ResponsiveContainer } from "recharts";
+import { GRID_COLOR, SERIES_COLORS } from "@/components/chart/chart-theme";
+import { formatWatts } from "@/lib/format";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
 interface SparklineProps {
-	/** Egyenletes időközű értékek. A null adathiány, ott megszakad a vonal. */
 	data: (number | null)[];
-	/** Egyedi azonosító a gradienshez, hogy több sparkline ne ütközzön. */
 	gradientId: string;
+	windowHours?: number;
 	height?: number;
 }
 
 const ACCENT = SERIES_COLORS[0];
 
-/** Tengely és tooltip nélküli mini grafikon a kártyákra. */
-export function Sparkline({ data, gradientId, height = 32 }: SparklineProps) {
+export function Sparkline({
+	data,
+	gradientId,
+	windowHours = 24,
+	height = 32,
+}: SparklineProps) {
 	const known = data.filter((value): value is number => value !== null);
 
 	if (known.length === 0) {
@@ -28,7 +32,18 @@ export function Sparkline({ data, gradientId, height = 32 }: SparklineProps) {
 		);
 	}
 
-	const rows = data.map((value, index) => ({ index, power: value }));
+	const minutesPerPoint = (windowHours * 60) / data.length;
+
+	const rows = data.map((value, index) => {
+		const minutesAgo = Math.round((data.length - 1 - index) * minutesPerPoint);
+		const stamp = new Date(Date.now() - minutesAgo * 60_000);
+		return {
+			label: `${String(stamp.getHours()).padStart(2, "0")}:${String(
+				stamp.getMinutes(),
+			).padStart(2, "0")}`,
+			power: value,
+		};
+	});
 
 	return (
 		<div style={{ height }} className="w-full">
@@ -40,6 +55,13 @@ export function Sparkline({ data, gradientId, height = 32 }: SparklineProps) {
 							<stop offset="100%" stopColor={ACCENT} stopOpacity={0} />
 						</linearGradient>
 					</defs>
+					<XAxis dataKey="label" hide />
+					<Tooltip
+						cursor={{ stroke: GRID_COLOR, strokeWidth: 1 }}
+						content={<SparkTooltip />}
+						allowEscapeViewBox={{ x: false, y: true }}
+						offset={12}
+					/>
 					<Area
 						type="monotone"
 						dataKey="power"
@@ -48,10 +70,34 @@ export function Sparkline({ data, gradientId, height = 32 }: SparklineProps) {
 						fill={`url(#${gradientId})`}
 						connectNulls={false}
 						dot={false}
+						activeDot={{ r: 2.5, strokeWidth: 0 }}
 						isAnimationActive={false}
 					/>
 				</AreaChart>
 			</ResponsiveContainer>
+		</div>
+	);
+}
+
+interface SparkTooltipProps {
+	active?: boolean;
+	payload?: { value?: string | number }[];
+	label?: string | number;
+}
+
+function SparkTooltip({ active, payload, label }: SparkTooltipProps) {
+	const value = payload?.[0]?.value;
+
+	if (!active || value === undefined || value === null) {
+		return null;
+	}
+
+	return (
+		<div className="rounded-md border border-app-border bg-app-panel px-2 py-1 shadow-lg">
+			<span className="font-mono text-[11px] tabular-nums">
+				<span className="text-app-faint">{label}</span>
+				<span className="ml-2 font-semibold">{formatWatts(Number(value))} W</span>
+			</span>
 		</div>
 	);
 }
